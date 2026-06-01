@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Perfumes</title>
+    <style>
+        /* Diseño elegante y minimalista (blanco y negro) */
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0; color: #333; }
+        header { background-color: #111; color: #fff; padding: 1.5rem; text-align: center; }
+        header h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; text-transform: uppercase; }
+        header p { margin: 5px 0 0 0; font-weight: 300; color: #ccc; }
+        
+        .container { max-width: 900px; margin: auto; padding: 2rem 1rem; }
+        h2 { text-transform: uppercase; font-size: 1.2rem; letter-spacing: 1px; border-bottom: 2px solid #111; padding-bottom: 10px; }
+        
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .card { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; border: 1px solid #eee; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; height: 220px; object-fit: cover; border-radius: 4px; background-color: #f4f4f4; }
+        .card h3 { font-size: 1.1rem; margin: 15px 0 5px 0; }
+        .card .price { font-weight: bold; font-size: 1.2rem; color: #111; margin-bottom: 5px; }
+        .card .stock { font-size: 0.85rem; font-weight: bold; margin-bottom: 15px; }
+        .stock.disponible { color: #28a745; }
+        .stock.agotado { color: #dc3545; }
+        
+        .btn { background-color: #111; color: #fff; border: none; padding: 12px; width: 100%; cursor: pointer; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; transition: background 0.2s; }
+        .btn:hover:not(:disabled) { background-color: #333; }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        
+        #cart { background: #fff; padding: 1.5rem; margin-top: 3rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .cart-item span { font-size: 1rem; }
+        .btn-remove { background: none; color: #dc3545; border: none; font-size: 1.2rem; cursor: pointer; font-weight: bold; padding: 0 10px; }
+        .total-section { text-align: right; margin-top: 20px; }
+        .total-section h3 { margin: 0 0 15px 0; font-size: 1.5rem; border: none; }
+        
+        #checkout-btn { background-color: #25D366; color: white; font-size: 1.1rem; border-radius: 50px; padding: 15px; }
+        #checkout-btn:hover { background-color: #1ebe5d; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Mi Marca de Perfumes</h1>
+        <p>Las mejores equivalencias del mercado</p>
+    </header>
+
+    <div class="container">
+
+        <h2>Nuestro Catálogo</h2>
+        <div class="product-grid" id="productos">
+            <!-- Los productos se cargarán aquí por JavaScript -->
+            <p style="text-align:center; grid-column: 1 / -1;">Cargando catálogo...</p>
+        </div>
+
+        <div id="cart">
+            <h2>Tu Carrito de Compras</h2>
+            <div id="cart-items">
+                <p style="color: #777;">No has agregado ningún perfume aún.</p>
+            </div>
+            
+            <div class="total-section">
+                <h3>Total: $<span id="total">0</span></h3>
+                <button id="checkout-btn" class="btn" onclick="enviarWhatsApp()">Pedir por WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 🛠️ CONFIGURACIÓN DE TU TIENDA
+        // ==========================================
+        
+        // 1. TU NÚMERO DE WHATSAPP (A donde llegarán los pedidos)
+        const miNumeroWhatsApp = "56967222932"; 
+        
+        // 2. EL ENLACE DE TU GOOGLE SHEETS (CSV)
+        const urlGoogleSheetsCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQF4HXUrjDqfvlJCXZLzA6_OWV587QSqj1I9x9r0UpgZhdYXtJG28MKFf9EZgMN5lZNzmWQwyhQI8oa/pub?output=csv"; 
+        
+        // ==========================================
+
+        let carrito = [];
+        let productos = [];
+
+        async function cargarCatalogo() {
+            try {
+                if(urlGoogleSheetsCSV === "") {
+                    document.getElementById('productos').innerHTML = '<p style="text-align:center;">Por favor, agrega el enlace de tu Google Sheets en el código.</p>';
+                    return;
+                }
+                
+                const respuesta = await fetch(urlGoogleSheetsCSV);
+                const textoCSV = await respuesta.text();
+                
+                // Dividir filas
+                const filas = textoCSV.split('\n');
+                productos = [];
+                
+                // Empezar en 1 para saltar la fila de títulos (Nombre, Precio, etc)
+                for(let i = 1; i < filas.length; i++) {
+                    if(!filas[i].trim()) continue;
+                    
+                    // Manejar posibles comas dentro de la URL de la imagen
+                    // Usamos una separación más robusta si es necesario, pero split(',') funciona para CSV básicos
+                    const columnas = filas[i].split(',');
+                    if (columnas.length >= 4) {
+                        productos.push({
+                            nombre: columnas[0].trim(),
+                            precio: parseInt(columnas[1].trim()) || 0,
+                            imagen: columnas[2].trim(),
+                            stock: parseInt(columnas[3].trim()) || 0
+                        });
+                    }
+                }
+                mostrarProductos();
+
+            } catch (error) {
+                console.error("Error al cargar Google Sheets:", error);
+                document.getElementById('productos').innerHTML = '<p style="color:red; text-align:center;">Hubo un error cargando el catálogo. Revisa el enlace de Google Sheets.</p>';
+            }
+        }
+
+        function mostrarProductos() {
+            const contenedor = document.getElementById('productos');
+            contenedor.innerHTML = '';
+            
+            if (productos.length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center; grid-column: 1 / -1;">No hay productos disponibles en este momento.</p>';
+                return;
+            }
+
+            productos.forEach((producto, indice) => {
+                const sinStock = producto.stock <= 0;
+                const claseStock = sinStock ? 'agotado' : 'disponible';
+                const textoStock = sinStock ? 'AGOTADO' : 'Stock: ' + producto.stock;
+                
+                contenedor.innerHTML += `
+                    <div class="card">
+                        <img src="${producto.imagen}" alt="${producto.nombre}">
+                        <h3>${producto.nombre}</h3>
+                        <p class="price">$${producto.precio.toLocaleString()}</p>
+                        <p class="stock ${claseStock}">${textoStock}</p>
+                        <button class="btn" ${sinStock ? 'disabled' : ''} onclick="agregarAlCarrito(${indice})">
+                            ${sinStock ? 'Sin stock' : 'Agregar al carrito'}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function agregarAlCarrito(indice) {
+            const producto = productos[indice];
+            carrito.push(producto);
+            actualizarCarritoUI();
+        }
+
+        function actualizarCarritoUI() {
+            const contenedorCarrito = document.getElementById('cart-items');
+            const spanTotal = document.getElementById('total');
+            contenedorCarrito.innerHTML = '';
+            let total = 0;
+            
+            if(carrito.length === 0) {
+                contenedorCarrito.innerHTML = '<p style="color: #777;">No has agregado ningún perfume aún.</p>';
+            } else {
+                carrito.forEach((item, indice) => {
+                    total += item.precio;
+                    contenedorCarrito.innerHTML += `
+                        <div class="cart-item">
+                            <span>✔️ ${item.nombre}</span>
+                            <div>
+                                <span style="font-weight:bold;">$${item.precio.toLocaleString()}</span>
+                                <button class="btn-remove" onclick="quitarDelCarrito(${indice})">×</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            spanTotal.innerText = total.toLocaleString();
+        }
+
+        function quitarDelCarrito(indice) {
+            carrito.splice(indice, 1);
+            actualizarCarritoUI();
+        }
+
+        function enviarWhatsApp() {
+            if(carrito.length === 0) {
+                alert('¡Tu carrito está vacío! Agrega algunos perfumes primero.');
+                return;
+            }
+            
+            let mensaje = "Hola! Vengo de tu web y quiero hacer el siguiente pedido:%0A%0A";
+            let total = 0;
+            
+            carrito.forEach(item => {
+                mensaje += `🛍️ ${item.nombre} - $${item.precio.toLocaleString()}%0A`;
+                total += item.precio;
+            });
+            
+            mensaje += `%0A*Total a pagar: $${total.toLocaleString()}*%0A%0A¡Quedo atent@ a los datos de pago!`;
+            
+            // Generar el enlace de WhatsApp
+            const url = `https://wa.me/${miNumeroWhatsApp}?text=${mensaje}`;
+            
+            // Abrir WhatsApp en una nueva pestaña
+            window.open(url, '_blank');
+        }
+
+        // Iniciar la página
+        window.onload = cargarCatalogo;
+    </script>
+</body>
+</html>
