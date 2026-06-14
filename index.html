@@ -22,12 +22,18 @@
         .filtro-grupo select:focus { border-color: #111; }
         
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
-        .card { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; border: 1px solid #eee; display: flex; flex-direction: column; }
+        .card { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; border: 1px solid #eee; display: flex; flex-direction: column; position: relative; }
         .card:hover { transform: translateY(-5px); }
         .card img { width: 100%; height: 220px; object-fit: cover; border-radius: 4px; background-color: #f4f4f4; }
         .card h3 { font-size: 1.1rem; margin: 15px 0 5px 0; }
         .tag-genero { display: inline-block; background-color: #eee; color: #555; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        
+        /* Estilos de Precios y Ofertas */
+        .tag-oferta { position: absolute; top: 10px; left: 10px; background-color: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; z-index: 10; letter-spacing: 1px; }
+        .precio-antiguo { text-decoration: line-through; color: #999; font-size: 0.95rem; margin: 0 0 -5px 0; }
+        .precio-oferta { color: #e74c3c !important; font-size: 1.3rem !important; }
         .card .price { font-weight: bold; font-size: 1.2rem; color: #111; margin-bottom: 5px; }
+        
         .card .stock { font-size: 0.85rem; font-weight: bold; margin-bottom: 15px; flex-grow: 1; }
         .stock.disponible { color: #28a745; }
         .stock.agotado { color: #dc3545; }
@@ -123,24 +129,30 @@
                     
                     const columnas = filas[i].split(',');
                     if (columnas.length >= 4) {
-                        // Rescatamos la columna 5 (Género). Si está vacía, le ponemos 'Unisex' por defecto
+                        
                         let generoPerfume = "unisex"; 
                         if (columnas.length >= 5 && columnas[4] && columnas[4].trim() !== "") {
                             generoPerfume = columnas[4].trim().toLowerCase();
                         }
 
+                        // Rescatamos la columna 6 (Precio Normal tachado)
+                        let precioNormal = 0;
+                        if (columnas.length >= 6 && columnas[5] && columnas[5].trim() !== "") {
+                            precioNormal = parseInt(columnas[5].trim()) || 0;
+                        }
+
                         productos.push({
-                            id: i, // ID único para el carrito
+                            id: i, 
                             nombre: columnas[0].trim(),
                             precio: parseInt(columnas[1].trim()) || 0,
                             imagen: columnas[2].trim(),
                             stock: parseInt(columnas[3].trim()) || 0,
-                            genero: generoPerfume
+                            genero: generoPerfume,
+                            precioNormal: precioNormal
                         });
                     }
                 }
                 
-                // Al inicio, ordenamos por stock automáticamente y mostramos todo
                 aplicarFiltros();
 
             } catch (error) {
@@ -149,27 +161,21 @@
             }
         }
 
-        // Esta función hace la magia de Filtrar y Ordenar
         function aplicarFiltros() {
             const generoSeleccionado = document.getElementById('filtro-genero').value;
             const ordenSeleccionado = document.getElementById('orden-precio').value;
 
-            // 1. Filtrar por género
             if (generoSeleccionado === 'todos') {
                 productosActuales = [...productos];
             } else {
                 productosActuales = productos.filter(p => p.genero === generoSeleccionado);
             }
 
-            // 2. Ordenar
             if (ordenSeleccionado === 'stock') {
-                // Ordenar de mayor stock a menor stock
                 productosActuales.sort((a, b) => b.stock - a.stock);
             } else if (ordenSeleccionado === 'menor') {
-                // Ordenar precio de Menor a Mayor
                 productosActuales.sort((a, b) => a.precio - b.precio);
             } else if (ordenSeleccionado === 'mayor') {
-                // Ordenar precio de Mayor a Menor
                 productosActuales.sort((a, b) => b.precio - a.precio);
             }
 
@@ -190,12 +196,25 @@
                 const claseStock = sinStock ? 'agotado' : 'disponible';
                 const textoStock = sinStock ? 'AGOTADO' : 'Stock: ' + producto.stock;
                 
+                // Lógica para mostrar la etiqueta de Oferta y el precio tachado
+                let htmlPrecio = `<p class="price">$${producto.precio.toLocaleString()}</p>`;
+                let tagOfertaHTML = '';
+                
+                if (producto.precioNormal > producto.precio) {
+                    tagOfertaHTML = `<span class="tag-oferta">OFERTA</span>`;
+                    htmlPrecio = `
+                        <p class="precio-antiguo">$${producto.precioNormal.toLocaleString()}</p>
+                        <p class="price precio-oferta">$${producto.precio.toLocaleString()}</p>
+                    `;
+                }
+                
                 contenedor.innerHTML += `
                     <div class="card">
+                        ${tagOfertaHTML}
                         <img src="${producto.imagen}" alt="${producto.nombre}" onerror="this.src='https://via.placeholder.com/400x400?text=Sin+Foto'">
                         <h3>${producto.nombre}</h3>
-                        <span class="tag-genero">${producto.genero}</span>
-                        <p class="price">$${producto.precio.toLocaleString()}</p>
+                        <div><span class="tag-genero">${producto.genero}</span></div>
+                        ${htmlPrecio}
                         <p class="stock ${claseStock}">${textoStock}</p>
                         <button class="btn" ${sinStock ? 'disabled' : ''} onclick="agregarAlCarrito(${indice})">
                             ${sinStock ? 'Sin stock' : 'Agregar al carrito'}
@@ -206,7 +225,6 @@
         }
 
         function agregarAlCarrito(indicePantalla) {
-            // Buscamos el producto exacto que se está mostrando
             const producto = productosActuales[indicePantalla];
             carrito.push(producto);
             actualizarCarritoUI();
