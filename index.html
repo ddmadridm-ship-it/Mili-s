@@ -154,30 +154,35 @@
                 for(let i = 1; i < filas.length; i++) {
                     if(!filas[i].trim()) continue;
                     
-                    const columnas = filas[i].split(',');
+                    // ESTA ES LA MAGIA: Una fórmula que ignora las comas dentro del texto de Excel
+                    const columnas = filas[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    
                     if (columnas.length >= 4) {
                         
+                        // Función para limpiar las comillas sobrantes
+                        const limpiar = (texto) => texto ? texto.replace(/^"|"$/g, '').trim() : "";
+
                         let generoPerfume = "unisex"; 
-                        if (columnas.length >= 5 && columnas[4] && columnas[4].trim() !== "") {
-                            generoPerfume = columnas[4].trim().toLowerCase();
+                        if (columnas.length >= 5 && columnas[4] && limpiar(columnas[4]) !== "") {
+                            generoPerfume = limpiar(columnas[4]).toLowerCase();
                         }
 
                         let precioNormal = 0;
-                        if (columnas.length >= 6 && columnas[5] && columnas[5].trim() !== "") {
-                            precioNormal = parseInt(columnas[5].trim()) || 0;
+                        if (columnas.length >= 6 && columnas[5] && limpiar(columnas[5]) !== "") {
+                            precioNormal = parseInt(limpiar(columnas[5])) || 0;
                         }
 
                         let notasOlfativas = "";
-                        if (columnas.length >= 7 && columnas[6] && columnas[6].trim() !== "") {
-                            notasOlfativas = columnas[6].trim();
+                        if (columnas.length >= 7 && columnas[6] && limpiar(columnas[6]) !== "") {
+                            notasOlfativas = limpiar(columnas[6]);
                         }
 
                         productos.push({
                             id: i, 
-                            nombre: columnas[0].trim(),
-                            precio: parseInt(columnas[1].trim()) || 0,
-                            imagen: columnas[2].trim(),
-                            stock: parseInt(columnas[3].trim()) || 0,
+                            nombre: limpiar(columnas[0]),
+                            precio: parseInt(limpiar(columnas[1])) || 0,
+                            imagen: limpiar(columnas[2]),
+                            stock: parseInt(limpiar(columnas[3])) || 0,
                             genero: generoPerfume,
                             precioNormal: precioNormal,
                             notas: notasOlfativas
@@ -235,7 +240,7 @@
                 const sinStock = producto.stock <= 0;
                 const claseStock = sinStock ? 'agotado' : 'disponible';
                 
-                // AQUÍ ESTÁ EL CAMBIO: Ya no muestra producto.stock, solo la palabra.
+                // Mantiene el cambio para no mostrar números
                 const textoStock = sinStock ? 'AGOTADO' : 'Disponible';
                 
                 let htmlPrecio = `<p class="price">$${producto.precio.toLocaleString()}</p>`;
@@ -251,7 +256,8 @@
 
                 let notasHTML = '';
                 if (producto.notas !== "") {
-                    notasHTML = `<p class="notas-olfativas">"${producto.notas}"</p>`;
+                    // Muestra las notas sin comillas adicionales
+                    notasHTML = `<p class="notas-olfativas">${producto.notas}</p>`;
                 }
                 
                 contenedor.innerHTML += `
