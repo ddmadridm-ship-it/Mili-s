@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Perfumes</title>
+    <title>Mili's Perfumes - Catálogo</title>
     <style>
-        /* Diseño elegante y minimalista (blanco y negro) */
+        /* Diseño elegante y minimalista */
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0; color: #333; }
         header { background-color: #111; color: #fff; padding: 1.5rem; text-align: center; }
         header h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; text-transform: uppercase; }
@@ -14,17 +14,25 @@
         .container { max-width: 900px; margin: auto; padding: 2rem 1rem; }
         h2 { text-transform: uppercase; font-size: 1.2rem; letter-spacing: 1px; border-bottom: 2px solid #111; padding-bottom: 10px; }
         
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
-        .card { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; border: 1px solid #eee; }
+        /* Estilos de la barra de filtros */
+        .filtros-container { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; align-items: center; }
+        .filtro-grupo { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 400px; }
+        .filtro-grupo label { font-weight: bold; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .filtro-grupo select { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; background-color: #fafafa; cursor: pointer; outline: none; }
+        .filtro-grupo select:focus { border-color: #111; }
+        
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .card { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; border: 1px solid #eee; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-5px); }
         .card img { width: 100%; height: 220px; object-fit: cover; border-radius: 4px; background-color: #f4f4f4; }
         .card h3 { font-size: 1.1rem; margin: 15px 0 5px 0; }
+        .tag-genero { display: inline-block; background-color: #eee; color: #555; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
         .card .price { font-weight: bold; font-size: 1.2rem; color: #111; margin-bottom: 5px; }
-        .card .stock { font-size: 0.85rem; font-weight: bold; margin-bottom: 15px; }
+        .card .stock { font-size: 0.85rem; font-weight: bold; margin-bottom: 15px; flex-grow: 1; }
         .stock.disponible { color: #28a745; }
         .stock.agotado { color: #dc3545; }
         
-        .btn { background-color: #111; color: #fff; border: none; padding: 12px; width: 100%; cursor: pointer; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; transition: background 0.2s; }
+        .btn { background-color: #111; color: #fff; border: none; padding: 12px; width: 100%; cursor: pointer; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; transition: background 0.2s; margin-top: auto; }
         .btn:hover:not(:disabled) { background-color: #333; }
         .btn:disabled { background-color: #ccc; cursor: not-allowed; }
         
@@ -42,15 +50,37 @@
 <body>
 
     <header>
-        <h1>Mi Marca de Perfumes</h1>
+        <h1>Mili's Perfumes</h1>
         <p>Las mejores equivalencias del mercado</p>
     </header>
 
     <div class="container">
 
         <h2>Nuestro Catálogo</h2>
+        
+        <!-- BARRA DE FILTROS -->
+        <div class="filtros-container">
+            <div class="filtro-grupo">
+                <label for="filtro-genero">Género:</label>
+                <select id="filtro-genero" onchange="aplicarFiltros()">
+                    <option value="todos">Todos los géneros</option>
+                    <option value="hombre">Hombre</option>
+                    <option value="mujer">Mujer</option>
+                    <option value="unisex">Unisex</option>
+                </select>
+            </div>
+            
+            <div class="filtro-grupo">
+                <label for="orden-precio">Ordenar por:</label>
+                <select id="orden-precio" onchange="aplicarFiltros()">
+                    <option value="stock">Mayor Stock (Recomendado)</option>
+                    <option value="menor">Precio: Menor a Mayor</option>
+                    <option value="mayor">Precio: Mayor a Menor</option>
+                </select>
+            </div>
+        </div>
+
         <div class="product-grid" id="productos">
-            <!-- Los productos se cargarán aquí por JavaScript -->
             <p style="text-align:center; grid-column: 1 / -1;">Cargando catálogo...</p>
         </div>
 
@@ -69,51 +99,49 @@
 
     <script>
         // ==========================================
-        // 🛠️ CONFIGURACIÓN DE TU TIENDA
+        // CONFIGURACIÓN DE TU TIENDA
         // ==========================================
-        
-        // 1. TU NÚMERO DE WHATSAPP (A donde llegarán los pedidos)
         const miNumeroWhatsApp = "56967222932"; 
-        
-        // 2. EL ENLACE DE TU GOOGLE SHEETS (CSV)
         const urlGoogleSheetsCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQF4HXUrjDqfvlJCXZLzA6_OWV587QSqj1I9x9r0UpgZhdYXtJG28MKFf9EZgMN5lZNzmWQwyhQI8oa/pub?output=csv"; 
-        
         // ==========================================
 
         let carrito = [];
-        let productos = [];
+        let productos = []; // Todos los productos del excel
+        let productosActuales = []; // Los que se muestran tras filtrar
 
         async function cargarCatalogo() {
             try {
-                if(urlGoogleSheetsCSV === "") {
-                    document.getElementById('productos').innerHTML = '<p style="text-align:center;">Por favor, agrega el enlace de tu Google Sheets en el código.</p>';
-                    return;
-                }
-                
                 const respuesta = await fetch(urlGoogleSheetsCSV);
                 const textoCSV = await respuesta.text();
                 
-                // Dividir filas
                 const filas = textoCSV.split('\n');
                 productos = [];
                 
-                // Empezar en 1 para saltar la fila de títulos (Nombre, Precio, etc)
+                // Empezar en 1 para saltar los títulos
                 for(let i = 1; i < filas.length; i++) {
                     if(!filas[i].trim()) continue;
                     
-                    // Manejar posibles comas dentro de la URL de la imagen
-                    // Usamos una separación más robusta si es necesario, pero split(',') funciona para CSV básicos
                     const columnas = filas[i].split(',');
                     if (columnas.length >= 4) {
+                        // Rescatamos la columna 5 (Género). Si está vacía, le ponemos 'Unisex' por defecto
+                        let generoPerfume = "unisex"; 
+                        if (columnas.length >= 5 && columnas[4] && columnas[4].trim() !== "") {
+                            generoPerfume = columnas[4].trim().toLowerCase();
+                        }
+
                         productos.push({
+                            id: i, // ID único para el carrito
                             nombre: columnas[0].trim(),
                             precio: parseInt(columnas[1].trim()) || 0,
                             imagen: columnas[2].trim(),
-                            stock: parseInt(columnas[3].trim()) || 0
+                            stock: parseInt(columnas[3].trim()) || 0,
+                            genero: generoPerfume
                         });
                     }
                 }
-                mostrarProductos();
+                
+                // Al inicio, ordenamos por stock automáticamente y mostramos todo
+                aplicarFiltros();
 
             } catch (error) {
                 console.error("Error al cargar Google Sheets:", error);
@@ -121,24 +149,52 @@
             }
         }
 
+        // Esta función hace la magia de Filtrar y Ordenar
+        function aplicarFiltros() {
+            const generoSeleccionado = document.getElementById('filtro-genero').value;
+            const ordenSeleccionado = document.getElementById('orden-precio').value;
+
+            // 1. Filtrar por género
+            if (generoSeleccionado === 'todos') {
+                productosActuales = [...productos];
+            } else {
+                productosActuales = productos.filter(p => p.genero === generoSeleccionado);
+            }
+
+            // 2. Ordenar
+            if (ordenSeleccionado === 'stock') {
+                // Ordenar de mayor stock a menor stock
+                productosActuales.sort((a, b) => b.stock - a.stock);
+            } else if (ordenSeleccionado === 'menor') {
+                // Ordenar precio de Menor a Mayor
+                productosActuales.sort((a, b) => a.precio - b.precio);
+            } else if (ordenSeleccionado === 'mayor') {
+                // Ordenar precio de Mayor a Menor
+                productosActuales.sort((a, b) => b.precio - a.precio);
+            }
+
+            mostrarProductos();
+        }
+
         function mostrarProductos() {
             const contenedor = document.getElementById('productos');
             contenedor.innerHTML = '';
             
-            if (productos.length === 0) {
-                contenedor.innerHTML = '<p style="text-align:center; grid-column: 1 / -1;">No hay productos disponibles en este momento.</p>';
+            if (productosActuales.length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center; grid-column: 1 / -1;">No hay perfumes que coincidan con tu búsqueda.</p>';
                 return;
             }
 
-            productos.forEach((producto, indice) => {
+            productosActuales.forEach((producto, indice) => {
                 const sinStock = producto.stock <= 0;
                 const claseStock = sinStock ? 'agotado' : 'disponible';
                 const textoStock = sinStock ? 'AGOTADO' : 'Stock: ' + producto.stock;
                 
                 contenedor.innerHTML += `
                     <div class="card">
-                        <img src="${producto.imagen}" alt="${producto.nombre}">
+                        <img src="${producto.imagen}" alt="${producto.nombre}" onerror="this.src='https://via.placeholder.com/400x400?text=Sin+Foto'">
                         <h3>${producto.nombre}</h3>
+                        <span class="tag-genero">${producto.genero}</span>
                         <p class="price">$${producto.precio.toLocaleString()}</p>
                         <p class="stock ${claseStock}">${textoStock}</p>
                         <button class="btn" ${sinStock ? 'disabled' : ''} onclick="agregarAlCarrito(${indice})">
@@ -149,8 +205,9 @@
             });
         }
 
-        function agregarAlCarrito(indice) {
-            const producto = productos[indice];
+        function agregarAlCarrito(indicePantalla) {
+            // Buscamos el producto exacto que se está mostrando
+            const producto = productosActuales[indicePantalla];
             carrito.push(producto);
             actualizarCarritoUI();
         }
@@ -201,14 +258,9 @@
             
             mensaje += `%0A*Total a pagar: $${total.toLocaleString()}*%0A%0A¡Quedo atent@ a los datos de pago!`;
             
-            // Generar el enlace de WhatsApp
-            const url = `https://wa.me/${miNumeroWhatsApp}?text=${mensaje}`;
-            
-            // Abrir WhatsApp en una nueva pestaña
-            window.open(url, '_blank');
+            window.open(`https://wa.me/${miNumeroWhatsApp}?text=${mensaje}`, '_blank');
         }
 
-        // Iniciar la página
         window.onload = cargarCatalogo;
     </script>
 </body>
