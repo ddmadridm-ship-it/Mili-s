@@ -8,8 +8,8 @@
         /* Diseño elegante y minimalista */
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0; color: #333; }
         
-        /* 1. Banner de Anuncios */
-        .top-banner { background-color: purple; color: white; text-align: center; padding: 10px; font-size: 0.85rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+        /* Banner de Anuncios */
+        .top-banner { background-color: #e74c3c; color: white; text-align: center; padding: 10px; font-size: 0.85rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
         
         header { background-color: #111; color: #fff; padding: 1.5rem; text-align: center; }
         header h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; text-transform: uppercase; }
@@ -21,7 +21,6 @@
         /* Estilos de la barra de filtros y búsqueda */
         .filtros-container { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; align-items: center; }
         
-        /* 2. Barra de Búsqueda */
         .buscador-container { width: 100%; }
         .buscador-container input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box; outline: none; font-family: inherit; }
         .buscador-container input:focus { border-color: #111; }
@@ -38,7 +37,6 @@
         .card h3 { font-size: 1.1rem; margin: 10px 0 5px 0; }
         .tag-genero { display: inline-block; background-color: #eee; color: #555; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
         
-        /* 3. Estilo para Notas Olfativas */
         .notas-olfativas { font-size: 0.85rem; color: #666; font-style: italic; margin: 5px 0 15px 0; line-height: 1.4; }
 
         /* Estilos de Precios y Ofertas */
@@ -65,7 +63,7 @@
         #checkout-btn { background-color: #25D366; color: white; font-size: 1.1rem; border-radius: 50px; padding: 15px; }
         #checkout-btn:hover { background-color: #1ebe5d; }
 
-        /* 4. Botón Flotante WhatsApp */
+        /* Botón Flotante WhatsApp */
         .whatsapp-flotante { position: fixed; bottom: 20px; right: 20px; background-color: #25D366; color: white; padding: 15px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; z-index: 1000; transition: transform 0.2s; }
         .whatsapp-flotante:hover { transform: scale(1.05); }
     </style>
@@ -74,7 +72,7 @@
 
     <!-- BANNER DE ANUNCIOS -->
     <div class="top-banner">
-       🔥 ¡Llegaron los nuevos dupes ✨ Consultar por Costos de envíos📦 
+        ✨ 10% de descuento pagando con transferencia | 📦 Consultar por envíos
     </div>
 
     <header>
@@ -87,7 +85,6 @@
         <h2>Nuestro Catálogo</h2>
         
         <div class="filtros-container">
-            <!-- BARRA DE BÚSQUEDA -->
             <div class="buscador-container">
                 <input type="text" id="buscador" placeholder="🔍 Buscar perfume o nota olfativa (Ej. Vainilla, Baccarat...)" onkeyup="aplicarFiltros()">
             </div>
@@ -157,9 +154,6 @@
                 for(let i = 1; i < filas.length; i++) {
                     if(!filas[i].trim()) continue;
                     
-                    // Manejar posibles comas dentro del texto de las notas usando una regex básica para CSV
-                    // Si tienes comas en tus notas, escríbelas entre comillas dobles en Excel (ej: "Nota 1, Nota 2")
-                    // Para simplificar, asumimos separación por comas estándar
                     const columnas = filas[i].split(',');
                     if (columnas.length >= 4) {
                         
@@ -173,7 +167,6 @@
                             precioNormal = parseInt(columnas[5].trim()) || 0;
                         }
 
-                        // Rescatamos la columna 7 (Notas olfativas)
                         let notasOlfativas = "";
                         if (columnas.length >= 7 && columnas[6] && columnas[6].trim() !== "") {
                             notasOlfativas = columnas[6].trim();
@@ -205,14 +198,12 @@
             const ordenSeleccionado = document.getElementById('orden-precio').value;
             const terminoBuscado = document.getElementById('buscador').value.toLowerCase();
 
-            // 1. Filtrar por Género
             if (generoSeleccionado === 'todos') {
                 productosActuales = [...productos];
             } else {
                 productosActuales = productos.filter(p => p.genero === generoSeleccionado);
             }
 
-            // 2. Filtrar por Barra de Búsqueda (busca en el nombre y en las notas)
             if (terminoBuscado !== "") {
                 productosActuales = productosActuales.filter(p => 
                     p.nombre.toLowerCase().includes(terminoBuscado) || 
@@ -220,7 +211,6 @@
                 );
             }
 
-            // 3. Ordenar
             if (ordenSeleccionado === 'stock') {
                 productosActuales.sort((a, b) => b.stock - a.stock);
             } else if (ordenSeleccionado === 'menor') {
@@ -244,7 +234,9 @@
             productosActuales.forEach((producto, indice) => {
                 const sinStock = producto.stock <= 0;
                 const claseStock = sinStock ? 'agotado' : 'disponible';
-                const textoStock = sinStock ? 'AGOTADO' : 'Stock: ' + producto.stock;
+                
+                // AQUÍ ESTÁ EL CAMBIO: Ya no muestra producto.stock, solo la palabra.
+                const textoStock = sinStock ? 'AGOTADO' : 'Disponible';
                 
                 let htmlPrecio = `<p class="price">$${producto.precio.toLocaleString()}</p>`;
                 let tagOfertaHTML = '';
@@ -257,7 +249,6 @@
                     `;
                 }
 
-                // Generar HTML de las notas olfativas si existen
                 let notasHTML = '';
                 if (producto.notas !== "") {
                     notasHTML = `<p class="notas-olfativas">"${producto.notas}"</p>`;
