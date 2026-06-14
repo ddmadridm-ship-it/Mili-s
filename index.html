@@ -7,6 +7,10 @@
     <style>
         /* Diseño elegante y minimalista */
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0; color: #333; }
+        
+        /* 1. Banner de Anuncios */
+        .top-banner { background-color: #e74c3c; color: white; text-align: center; padding: 10px; font-size: 0.85rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+        
         header { background-color: #111; color: #fff; padding: 1.5rem; text-align: center; }
         header h1 { margin: 0; font-size: 1.8rem; letter-spacing: 2px; text-transform: uppercase; }
         header p { margin: 5px 0 0 0; font-weight: 300; color: #ccc; }
@@ -14,8 +18,14 @@
         .container { max-width: 900px; margin: auto; padding: 2rem 1rem; }
         h2 { text-transform: uppercase; font-size: 1.2rem; letter-spacing: 1px; border-bottom: 2px solid #111; padding-bottom: 10px; }
         
-        /* Estilos de la barra de filtros */
+        /* Estilos de la barra de filtros y búsqueda */
         .filtros-container { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; display: flex; flex-wrap: wrap; gap: 15px; justify-content: space-between; align-items: center; }
+        
+        /* 2. Barra de Búsqueda */
+        .buscador-container { width: 100%; }
+        .buscador-container input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box; outline: none; font-family: inherit; }
+        .buscador-container input:focus { border-color: #111; }
+
         .filtro-grupo { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 400px; }
         .filtro-grupo label { font-weight: bold; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .filtro-grupo select { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; background-color: #fafafa; cursor: pointer; outline: none; }
@@ -24,10 +34,13 @@
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
         .card { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; border: 1px solid #eee; display: flex; flex-direction: column; position: relative; }
         .card:hover { transform: translateY(-5px); }
-        .card img { width: 100%; height: 220px; object-fit: cover; border-radius: 4px; background-color: #f4f4f4; }
-        .card h3 { font-size: 1.1rem; margin: 15px 0 5px 0; }
-        .tag-genero { display: inline-block; background-color: #eee; color: #555; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .card img { width: 100%; height: 220px; object-fit: cover; border-radius: 4px; background-color: #f4f4f4; margin-bottom: 10px; }
+        .card h3 { font-size: 1.1rem; margin: 10px 0 5px 0; }
+        .tag-genero { display: inline-block; background-color: #eee; color: #555; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
         
+        /* 3. Estilo para Notas Olfativas */
+        .notas-olfativas { font-size: 0.85rem; color: #666; font-style: italic; margin: 5px 0 15px 0; line-height: 1.4; }
+
         /* Estilos de Precios y Ofertas */
         .tag-oferta { position: absolute; top: 10px; left: 10px; background-color: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; z-index: 10; letter-spacing: 1px; }
         .precio-antiguo { text-decoration: line-through; color: #999; font-size: 0.95rem; margin: 0 0 -5px 0; }
@@ -51,9 +64,18 @@
         
         #checkout-btn { background-color: #25D366; color: white; font-size: 1.1rem; border-radius: 50px; padding: 15px; }
         #checkout-btn:hover { background-color: #1ebe5d; }
+
+        /* 4. Botón Flotante WhatsApp */
+        .whatsapp-flotante { position: fixed; bottom: 20px; right: 20px; background-color: #25D366; color: white; padding: 15px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; z-index: 1000; transition: transform 0.2s; }
+        .whatsapp-flotante:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
+
+    <!-- BANNER DE ANUNCIOS -->
+    <div class="top-banner">
+        ✨ 10% de descuento pagando con transferencia | 📦 Consultar por envíos
+    </div>
 
     <header>
         <h1>Mili's Perfumes</h1>
@@ -64,8 +86,12 @@
 
         <h2>Nuestro Catálogo</h2>
         
-        <!-- BARRA DE FILTROS -->
         <div class="filtros-container">
+            <!-- BARRA DE BÚSQUEDA -->
+            <div class="buscador-container">
+                <input type="text" id="buscador" placeholder="🔍 Buscar perfume o nota olfativa (Ej. Vainilla, Baccarat...)" onkeyup="aplicarFiltros()">
+            </div>
+
             <div class="filtro-grupo">
                 <label for="filtro-genero">Género:</label>
                 <select id="filtro-genero" onchange="aplicarFiltros()">
@@ -103,6 +129,11 @@
         </div>
     </div>
 
+    <!-- BOTÓN FLOTANTE WHATSAPP -->
+    <a href="https://wa.me/56967222932?text=Hola!%20Tengo%20una%20duda%20sobre%20los%20perfumes." class="whatsapp-flotante" target="_blank">
+        💬 ¿Dudas? Háblame
+    </a>
+
     <script>
         // ==========================================
         // CONFIGURACIÓN DE TU TIENDA
@@ -112,8 +143,8 @@
         // ==========================================
 
         let carrito = [];
-        let productos = []; // Todos los productos del excel
-        let productosActuales = []; // Los que se muestran tras filtrar
+        let productos = []; 
+        let productosActuales = []; 
 
         async function cargarCatalogo() {
             try {
@@ -123,10 +154,12 @@
                 const filas = textoCSV.split('\n');
                 productos = [];
                 
-                // Empezar en 1 para saltar los títulos
                 for(let i = 1; i < filas.length; i++) {
                     if(!filas[i].trim()) continue;
                     
+                    // Manejar posibles comas dentro del texto de las notas usando una regex básica para CSV
+                    // Si tienes comas en tus notas, escríbelas entre comillas dobles en Excel (ej: "Nota 1, Nota 2")
+                    // Para simplificar, asumimos separación por comas estándar
                     const columnas = filas[i].split(',');
                     if (columnas.length >= 4) {
                         
@@ -135,10 +168,15 @@
                             generoPerfume = columnas[4].trim().toLowerCase();
                         }
 
-                        // Rescatamos la columna 6 (Precio Normal tachado)
                         let precioNormal = 0;
                         if (columnas.length >= 6 && columnas[5] && columnas[5].trim() !== "") {
                             precioNormal = parseInt(columnas[5].trim()) || 0;
+                        }
+
+                        // Rescatamos la columna 7 (Notas olfativas)
+                        let notasOlfativas = "";
+                        if (columnas.length >= 7 && columnas[6] && columnas[6].trim() !== "") {
+                            notasOlfativas = columnas[6].trim();
                         }
 
                         productos.push({
@@ -148,7 +186,8 @@
                             imagen: columnas[2].trim(),
                             stock: parseInt(columnas[3].trim()) || 0,
                             genero: generoPerfume,
-                            precioNormal: precioNormal
+                            precioNormal: precioNormal,
+                            notas: notasOlfativas
                         });
                     }
                 }
@@ -164,13 +203,24 @@
         function aplicarFiltros() {
             const generoSeleccionado = document.getElementById('filtro-genero').value;
             const ordenSeleccionado = document.getElementById('orden-precio').value;
+            const terminoBuscado = document.getElementById('buscador').value.toLowerCase();
 
+            // 1. Filtrar por Género
             if (generoSeleccionado === 'todos') {
                 productosActuales = [...productos];
             } else {
                 productosActuales = productos.filter(p => p.genero === generoSeleccionado);
             }
 
+            // 2. Filtrar por Barra de Búsqueda (busca en el nombre y en las notas)
+            if (terminoBuscado !== "") {
+                productosActuales = productosActuales.filter(p => 
+                    p.nombre.toLowerCase().includes(terminoBuscado) || 
+                    p.notas.toLowerCase().includes(terminoBuscado)
+                );
+            }
+
+            // 3. Ordenar
             if (ordenSeleccionado === 'stock') {
                 productosActuales.sort((a, b) => b.stock - a.stock);
             } else if (ordenSeleccionado === 'menor') {
@@ -187,7 +237,7 @@
             contenedor.innerHTML = '';
             
             if (productosActuales.length === 0) {
-                contenedor.innerHTML = '<p style="text-align:center; grid-column: 1 / -1;">No hay perfumes que coincidan con tu búsqueda.</p>';
+                contenedor.innerHTML = '<p style="text-align:center; grid-column: 1 / -1; padding: 2rem;">No encontramos perfumes con esa búsqueda. ¡Prueba con otra palabra!</p>';
                 return;
             }
 
@@ -196,7 +246,6 @@
                 const claseStock = sinStock ? 'agotado' : 'disponible';
                 const textoStock = sinStock ? 'AGOTADO' : 'Stock: ' + producto.stock;
                 
-                // Lógica para mostrar la etiqueta de Oferta y el precio tachado
                 let htmlPrecio = `<p class="price">$${producto.precio.toLocaleString()}</p>`;
                 let tagOfertaHTML = '';
                 
@@ -207,6 +256,12 @@
                         <p class="price precio-oferta">$${producto.precio.toLocaleString()}</p>
                     `;
                 }
+
+                // Generar HTML de las notas olfativas si existen
+                let notasHTML = '';
+                if (producto.notas !== "") {
+                    notasHTML = `<p class="notas-olfativas">"${producto.notas}"</p>`;
+                }
                 
                 contenedor.innerHTML += `
                     <div class="card">
@@ -214,6 +269,7 @@
                         <img src="${producto.imagen}" alt="${producto.nombre}" onerror="this.src='https://via.placeholder.com/400x400?text=Sin+Foto'">
                         <h3>${producto.nombre}</h3>
                         <div><span class="tag-genero">${producto.genero}</span></div>
+                        ${notasHTML}
                         ${htmlPrecio}
                         <p class="stock ${claseStock}">${textoStock}</p>
                         <button class="btn" ${sinStock ? 'disabled' : ''} onclick="agregarAlCarrito(${indice})">
